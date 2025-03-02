@@ -108,8 +108,8 @@
             }
         }
 
-        // Fetch and parse RSS feed using a proxy
-        async function fetchRSSFeed() {
+        // Fetch and parse RSS feed
+        async function fetchLatestSnippet() {
             const rssUrl = "https://venturebeat.com/category/ai/feed/";
             const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
 
@@ -121,27 +121,22 @@
                     throw new Error("Failed to fetch RSS feed.");
                 }
 
-                const snippets = data.items.map(item => ({
-                    text: item.description,
-                    source: item.link
-                }));
+                // Sort articles by date (latest first)
+                const items = data.items.map(item => ({
+                    description: item.description,
+                    link: item.link,
+                    pubDate: new Date(item.pubDate)
+                })).sort((a, b) => b.pubDate - a.pubDate);
 
-                return snippets;
+                // Pick the latest article
+                const latestArticle = items[0];
+
+                // Display the snippet
+                document.getElementById("snippet-text").textContent = latestArticle.description;
+                document.getElementById("snippet-source").innerHTML = 
+                    `Published on: ${latestArticle.pubDate.toDateString()} | <a href="${latestArticle.link}" target="_blank">Read More</a>`;
             } catch (error) {
                 console.error("Error fetching RSS feed:", error);
-                return [];
-            }
-        }
-
-        // Show random AI snippet from VentureBeat
-        async function showRSSSnippet() {
-            const snippets = await fetchRSSFeed();
-
-            if (snippets.length > 0) {
-                const randomSnippet = snippets[Math.floor(Math.random() * snippets.length)];
-                document.getElementById("snippet-text").textContent = randomSnippet.text;
-                document.getElementById("snippet-source").innerHTML = `<a href="${randomSnippet.source}" target="_blank">Read more</a>`;
-            } else {
                 document.getElementById("snippet-text").textContent = "Failed to load snippets.";
                 document.getElementById("snippet-source").textContent = "";
             }
@@ -149,10 +144,10 @@
 
         // Initialize
         updateDateTime();
-        showRSSSnippet();
+        fetchLatestSnippet();
 
         // Event listener for "Next Snippet"
-        document.getElementById("next-btn").addEventListener("click", showRSSSnippet);
+        document.getElementById("next-btn").addEventListener("click", fetchLatestSnippet);
     </script>
 </body>
 </html>
