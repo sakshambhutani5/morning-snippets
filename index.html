@@ -83,7 +83,7 @@
         <div class="date" id="current-date"></div>
         
         <div class="snippet-container">
-            <div class="snippet" id="snippet-text">Loading your morning insight...</div>
+            <div class="snippet" id="snippet-text">Loading AI insights...</div>
             <div class="source" id="snippet-source"></div>
         </div>
         
@@ -91,44 +91,14 @@
     </div>
 
     <script>
-        // Sample snippets (these would ideally come from a backend or API)
-        const snippets = [
-            {
-                text: "Research shows that people who exercise in the morning are more likely to maintain their routine long-term.",
-                source: "Health Newsletter"
-            },
-            {
-                text: "The most productive people don't use to-do lists. Instead, they schedule their tasks directly into their calendar.",
-                source: "Productivity Weekly"
-            },
-            {
-                text: "Reading for just 6 minutes can reduce stress levels by up to 68%, according to research from the University of Sussex.",
-                source: "Mind Matters"
-            },
-            {
-                text: "The companies that invest most heavily in R&D during economic downturns often emerge as market leaders during recovery.",
-                source: "Business Insights"
-            },
-            {
-                text: "Changing just one daily habit can have a compound effect, leading to a 1% improvement each day - resulting in a 37x improvement over a year.",
-                source: "Growth Mindset Journal"
-            }
-        ];
-
-        // Get DOM elements
-        const greetingElement = document.getElementById('greeting');
-        const dateElement = document.getElementById('current-date');
-        const snippetElement = document.getElementById('snippet-text');
-        const sourceElement = document.getElementById('snippet-source');
-        const nextButton = document.getElementById('next-btn');
-
-        // Update the time and greeting
+        // Update the greeting and date
         function updateDateTime() {
             const now = new Date();
             const options = { weekday: 'long', month: 'long', day: 'numeric' };
-            dateElement.textContent = now.toLocaleDateString('en-US', options);
+            document.getElementById("current-date").textContent = now.toLocaleDateString('en-US', options);
             
             const hour = now.getHours();
+            const greetingElement = document.getElementById("greeting");
             if (hour < 12) {
                 greetingElement.textContent = "Good morning";
             } else if (hour < 18) {
@@ -138,31 +108,47 @@
             }
         }
 
-        // Display a random snippet
-        function showRandomSnippet() {
-            const randomIndex = Math.floor(Math.random() * snippets.length);
-            const selectedSnippet = snippets[randomIndex];
-            
-            snippetElement.textContent = selectedSnippet.text;
-            sourceElement.textContent = selectedSnippet.source;
+        // Fetch and parse RSS feed
+        async function fetchRSSFeed(url) {
+            try {
+                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+                const data = await response.json();
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(data.contents, "text/xml");
+
+                const items = xml.querySelectorAll("item");
+                const snippets = Array.from(items).map(item => ({
+                    text: item.querySelector("title").textContent,
+                    source: item.querySelector("link").textContent
+                }));
+
+                return snippets;
+            } catch (error) {
+                console.error("Error fetching RSS feed:", error);
+                return [];
+            }
+        }
+
+        // Show random AI snippet from VentureBeat
+        async function showRSSSnippet() {
+            const snippets = await fetchRSSFeed("https://venturebeat.com/category/ai/feed/");
+
+            if (snippets.length > 0) {
+                const randomSnippet = snippets[Math.floor(Math.random() * snippets.length)];
+                document.getElementById("snippet-text").textContent = randomSnippet.text;
+                document.getElementById("snippet-source").innerHTML = `<a href="${randomSnippet.source}" target="_blank">Read more</a>`;
+            } else {
+                document.getElementById("snippet-text").textContent = "Failed to load snippets.";
+                document.getElementById("snippet-source").textContent = "";
+            }
         }
 
         // Initialize
         updateDateTime();
-        showRandomSnippet();
-        
-        // Add event listeners
-        nextButton.addEventListener('click', showRandomSnippet);
-        
-        // Store last visit date
-        const lastVisit = localStorage.getItem('lastVisit');
-        const today = new Date().toDateString();
-        
-        // If it's the first visit of the day, show a random snippet
-        if (lastVisit !== today) {
-            localStorage.setItem('lastVisit', today);
-            showRandomSnippet();
-        }
+        showRSSSnippet();
+
+        // Event listener for "Next Snippet"
+        document.getElementById("next-btn").addEventListener("click", showRSSSnippet);
     </script>
 </body>
 </html>
