@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Morning Snippets</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+        }
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+        .greeting {
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .date {
+            font-size: 1rem;
+            margin-bottom: 40px;
+            color: #515154;
+        }
+        .snippet-container {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            width: 85%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+        .snippet {
+            font-size: 1.2rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        .source {
+            font-size: 0.9rem;
+            color: #515154;
+            font-style: italic;
+        }
+        .action-btn {
+            background-color: #0071e3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        .settings-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: #515154;
+        }
+    </style>
+</head>
+<body>
+    <button class="settings-btn">⚙️</button>
+    <div class="container">
+        <div class="greeting" id="greeting">Good morning</div>
+        <div class="date" id="current-date"></div>
+        
+        <div class="snippet-container">
+            <div class="snippet" id="snippet-text">Loading your morning insight...</div>
+            <div class="source" id="snippet-source"></div>
+        </div>
+        
+        <button class="action-btn" id="next-btn">Next Snippet</button>
+    </div>
+
+    <script>
+        // Sample snippets (these would ideally come from a backend or API)
+        const snippets = [
+            {
+                text: "Research shows that people who exercise in the morning are more likely to maintain their routine long-term.",
+                source: "Health Newsletter"
+            },
+            {
+                text: "The most productive people don't use to-do lists. Instead, they schedule their tasks directly into their calendar.",
+                source: "Productivity Weekly"
+            },
+            {
+                text: "Reading for just 6 minutes can reduce stress levels by up to 68%, according to research from the University of Sussex.",
+                source: "Mind Matters"
+            },
+            {
+                text: "The companies that invest most heavily in R&D during economic downturns often emerge as market leaders during recovery.",
+                source: "Business Insights"
+            },
+            {
+                text: "Changing just one daily habit can have a compound effect, leading to a 1% improvement each day - resulting in a 37x improvement over a year.",
+                source: "Growth Mindset Journal"
+            }
+        ];
+
+        // Get DOM elements
+        const greetingElement = document.getElementById('greeting');
+        const dateElement = document.getElementById('current-date');
+        const snippetElement = document.getElementById('snippet-text');
+        const sourceElement = document.getElementById('snippet-source');
+        const nextButton = document.getElementById('next-btn');
+
+        // Update the time and greeting
+        function updateDateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', month: 'long', day: 'numeric' };
+            dateElement.textContent = now.toLocaleDateString('en-US', options);
+            
+            const hour = now.getHours();
+            if (hour < 12) {
+                greetingElement.textContent = "Good morning";
+            } else if (hour < 18) {
+                greetingElement.textContent = "Good afternoon";
+            } else {
+                greetingElement.textContent = "Good evening";
+            }
+        }
+
+        // Display a random snippet
+        function showRandomSnippet() {
+            const randomIndex = Math.floor(Math.random() * snippets.length);
+            const selectedSnippet = snippets[randomIndex];
+            
+            snippetElement.textContent = selectedSnippet.text;
+            sourceElement.textContent = selectedSnippet.source;
+        }
+
+        // Initialize
+        updateDateTime();
+        showRandomSnippet();
+        
+        // Add event listeners
+        nextButton.addEventListener('click', showRandomSnippet);
+        
+        // Store last visit date
+        const lastVisit = localStorage.getItem('lastVisit');
+        const today = new Date().toDateString();
+        
+        // If it's the first visit of the day, show a random snippet
+        if (lastVisit !== today) {
+            localStorage.setItem('lastVisit', today);
+            showRandomSnippet();
+        }
+    </script>
+</body>
+</html>
