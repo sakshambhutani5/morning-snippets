@@ -108,18 +108,22 @@
             }
         }
 
-        // Fetch and parse RSS feed
-        async function fetchRSSFeed(url) {
-            try {
-                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
-                const data = await response.json();
-                const parser = new DOMParser();
-                const xml = parser.parseFromString(data.contents, "text/xml");
+        // Fetch and parse RSS feed using a proxy
+        async function fetchRSSFeed() {
+            const rssUrl = "https://venturebeat.com/category/ai/feed/";
+            const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
 
-                const items = xml.querySelectorAll("item");
-                const snippets = Array.from(items).map(item => ({
-                    text: item.querySelector("title").textContent,
-                    source: item.querySelector("link").textContent
+            try {
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+
+                if (data.status !== "ok") {
+                    throw new Error("Failed to fetch RSS feed.");
+                }
+
+                const snippets = data.items.map(item => ({
+                    text: item.title,
+                    source: item.link
                 }));
 
                 return snippets;
@@ -131,7 +135,7 @@
 
         // Show random AI snippet from VentureBeat
         async function showRSSSnippet() {
-            const snippets = await fetchRSSFeed("https://venturebeat.com/category/ai/feed/");
+            const snippets = await fetchRSSFeed();
 
             if (snippets.length > 0) {
                 const randomSnippet = snippets[Math.floor(Math.random() * snippets.length)];
