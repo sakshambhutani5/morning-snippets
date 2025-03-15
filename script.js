@@ -1,6 +1,6 @@
 async function fetchLatestSnippet() {
     try {
-        const response = await fetch(`https://gnews.io/api/v4/search?q=Artificial+Intelligence&lang=en&token=${f6bf806baa42405dece46b5f18121d38}`);
+        const response = await fetch(`https://gnews.io/api/v4/search?q=Artificial+Intelligence&lang=en&token=${API_KEY}`);
         const data = await response.json();
 
         if (!data.articles || data.articles.length === 0) {
