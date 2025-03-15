@@ -1,12 +1,10 @@
-const API_KEY = window.API_KEY;
-const RAPIDAPI_KEY = window.RAPIDAPI_KEY;
-
+// ✅ Use window.API_KEY and window.RAPIDAPI_KEY directly (Do NOT redeclare)
 const SOURCES = "venturebeat.com,techcrunch.com,wired.com,arxiv.org,towardsdatascience.com,syncedreview.com,ai.googleblog.com,nytimes.com,bbc.com,forbes.com,bloomberg.com,reuters.com";
-const TLDR_API_URL = "https://tldrthis.p.rapidapi.com/v1/model/abstractive/summarize-url"; // Removed extra "/"
+const TLDR_API_URL = "https://tldrthis.p.rapidapi.com/v1/model/abstractive/summarize-url";
 
 async function fetchLatestSnippet() {
     try {
-        const response = await fetch(`https://gnews.io/api/v4/search?q=Artificial+Intelligence&lang=en&token=${API_KEY}`);
+        const response = await fetch(`https://gnews.io/api/v4/search?q=Artificial+Intelligence&lang=en&token=${window.API_KEY}`);
         
         if (!response.ok) {
             throw new Error(`GNews API error: ${response.statusText}`);
@@ -46,8 +44,8 @@ async function summarizeWithTldrThis(url) {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "X-RapidAPI-Key": RAPIDAPI_KEY,  // ✅ Ensuring correct key name
-                "X-RapidAPI-Host": "tldrthis.p.rapidapi.com" // ✅ Fixed case issue
+                "X-RapidAPI-Key": window.RAPIDAPI_KEY,  // ✅ Use window.RAPIDAPI_KEY
+                "X-RapidAPI-Host": "tldrthis.p.rapidapi.com"
             },
             body: JSON.stringify({
                 url: url,
@@ -84,4 +82,9 @@ function updateDateTime() {
     greetingElement.textContent = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 }
 
-// Initiali
+// Initialize
+updateDateTime();
+fetchLatestSnippet();
+
+// Event listener for "Next Snippet"
+document.getElementById("next-btn").addEventListener("click", fetchLatestSnippet);
