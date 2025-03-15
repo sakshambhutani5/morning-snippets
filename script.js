@@ -1,4 +1,5 @@
-import { API_KEY, RAPIDAPI_KEY } from './config.js';
+const API_KEY = window.API_KEY;
+const RAPIDAPI_KEY = window.RAPIDAPI_KEY;
 
 const SOURCES = "venturebeat.com,techcrunch.com,wired.com,arxiv.org,towardsdatascience.com,syncedreview.com,ai.googleblog.com,nytimes.com,bbc.com,forbes.com,bloomberg.com,reuters.com";
 const TLDR_API_URL = "https://tldrthis.p.rapidapi.com/v1/model/abstractive/summarize-url/";
