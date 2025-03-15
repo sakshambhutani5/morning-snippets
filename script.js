@@ -2,14 +2,18 @@ const API_KEY = window.API_KEY;
 const RAPIDAPI_KEY = window.RAPIDAPI_KEY;
 
 const SOURCES = "venturebeat.com,techcrunch.com,wired.com,arxiv.org,towardsdatascience.com,syncedreview.com,ai.googleblog.com,nytimes.com,bbc.com,forbes.com,bloomberg.com,reuters.com";
-const TLDR_API_URL = "https://tldrthis.p.rapidapi.com/v1/model/abstractive/summarize-url/";
+const TLDR_API_URL = "https://tldrthis.p.rapidapi.com/v1/model/abstractive/summarize-url"; // Removed extra "/"
 
 async function fetchLatestSnippet() {
     try {
         const response = await fetch(`https://gnews.io/api/v4/search?q=Artificial+Intelligence&lang=en&token=${API_KEY}`);
-        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(`GNews API error: ${response.statusText}`);
+        }
 
-        console.log("Fetched GNews data:", data);  // Debugging
+        const data = await response.json();
+        console.log("Fetched GNews data:", data);
 
         if (!data.articles || data.articles.length === 0) {
             throw new Error("No news articles found.");
@@ -20,7 +24,7 @@ async function fetchLatestSnippet() {
         const latestArticle = sortedArticles[0];
         const articleUrl = latestArticle.url;
 
-        console.log("Fetching summary for:", articleUrl);  // Debugging
+        console.log("Fetching summary for:", articleUrl);
 
         // Fetch summary from TLDRThis
         const summary = await summarizeWithTldrThis(articleUrl);
@@ -42,10 +46,10 @@ async function summarizeWithTldrThis(url) {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "x-rapidapi-key": RAPIDAPI_KEY,
-                "x-rapidapi-host": "tldrthis.p.rapidapi.com"
+                "X-RapidAPI-Key": RAPIDAPI_KEY,  // ✅ Ensuring correct key name
+                "X-RapidAPI-Host": "tldrthis.p.rapidapi.com" // ✅ Fixed case issue
             },
-            body: JSON.stringify({  // ✅ Proper JSON formatting
+            body: JSON.stringify({
                 url: url,
                 min_length: 100,
                 max_length: 300,
@@ -54,8 +58,13 @@ async function summarizeWithTldrThis(url) {
         };
 
         const response = await fetch(TLDR_API_URL, options);
-        const data = await response.json();  // ✅ Properly parse response as JSON
-        console.log("TLDR API Response:", data); // Debugging
+        
+        if (!response.ok) {
+            throw new Error(`TLDR API error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log("TLDR API Response:", data);
 
         return data.summary || "Summary not available.";
     } catch (error) {
@@ -75,9 +84,4 @@ function updateDateTime() {
     greetingElement.textContent = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 }
 
-// Initialize
-updateDateTime();
-fetchLatestSnippet();
-
-// Event listener for "Next Snippet"
-document.getElementById("next-btn").addEventListener("click", fetchLatestSnippet);
+// Initiali
