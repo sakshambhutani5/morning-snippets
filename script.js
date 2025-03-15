@@ -38,19 +38,35 @@ async function summarizeWithTldrThis(url) {
         const response = await fetch(TLDR_API_URL, {
             method: "POST",
             headers: {
-                "content-type": "application/json",
-                "X-RapidAPI-Key": RAPIDAPI_KEY,  // Your RapidAPI key
+                "Content-Type": "application/json",
+                "X-RapidAPI-Key": RAPIDAPI_KEY,
                 "X-RapidAPI-Host": "tldrthis.p.rapidapi.com"
             },
-            body: JSON.stringify({ url: url, num_sentences: 3 })  // Adjust summary length
+            body: JSON.stringify({
+                url: url,
+                min_length: 100, // Adjust minimum length
+                max_length: 300, // Adjust maximum length
+                is_detailed: false
+            })
         });
 
         const data = await response.json();
-        return data.summary || "Summary not available";
+        return data.summary || "Summary not available.";
     } catch (error) {
         console.error("Error fetching summary:", error);
-        return "Summary not available";
+        return "Summary not available.";
     }
+}
+
+// Function to update the date and greeting
+function updateDateTime() {
+    const now = new Date();
+    const options = { weekday: 'long', month: 'long', day: 'numeric' };
+    document.getElementById("current-date").textContent = now.toLocaleDateString('en-US', options);
+
+    const hour = now.getHours();
+    const greetingElement = document.getElementById("greeting");
+    greetingElement.textContent = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 }
 
 // Initialize
