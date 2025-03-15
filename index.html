@@ -6,75 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Morning Snippets</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background-color: #f5f5f7;
-            color: #1d1d1f;
-        }
-        .container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            text-align: center;
-        }
-        .greeting {
-            font-size: 1.6rem;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-        .date {
-            font-size: 1rem;
-            margin-bottom: 40px;
-            color: #515154;
-        }
-        .snippet-container {
-            background-color: white;
-            border-radius: 12px;
-            padding: 25px;
-            width: 85%;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            margin-bottom: 30px;
-        }
-        .snippet {
-            font-size: 1.2rem;
-            line-height: 1.5;
-            margin-bottom: 15px;
-        }
-        .source {
-            font-size: 0.9rem;
-            color: #515154;
-            font-style: italic;
-        }
-        .action-btn {
-            background-color: #0071e3;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 20px;
-            font-size: 1rem;
-            font-weight: 500;
-            margin-top: 10px;
-            cursor: pointer;
-        }
-        .settings-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            color: #515154;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <button class="settings-btn">⚙️</button>
@@ -90,68 +22,8 @@
         <button class="action-btn" id="next-btn">Next Snippet</button>
     </div>
 
-    <script>
-        // Update the greeting and date
-        function updateDateTime() {
-            const now = new Date();
-            const options = { weekday: 'long', month: 'long', day: 'numeric' };
-            document.getElementById("current-date").textContent = now.toLocaleDateString('en-US', options);
-            
-            const hour = now.getHours();
-            const greetingElement = document.getElementById("greeting");
-            if (hour < 12) {
-                greetingElement.textContent = "Good morning";
-            } else if (hour < 18) {
-                greetingElement.textContent = "Good afternoon";
-            } else {
-                greetingElement.textContent = "Good evening";
-            }
-        }
-
-        // Fetch AI news from GNews API
-        async function fetchLatestSnippet() {
-            const API_KEY = "f6bf806baa42405dece46b5f18121d38";  // Replace with your actual API key
-            const url = `https://gnews.io/api/v4/search?q=Artificial+Intelligence&lang=en&token=${API_KEY}`;
-
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (!data.articles || data.articles.length === 0) {
-                    throw new Error("No news articles found.");
-                }
-
-                // Pick a random article
-                const randomIndex = Math.floor(Math.random() * data.articles.length);
-                const article = data.articles[randomIndex];
-
-                // Summarize content (limit to ~50 words)
-                const summary = summarizeText(article.description || article.content, 50);
-
-                // Display the snippet
-                document.getElementById("snippet-text").textContent = summary;
-                document.getElementById("snippet-source").innerHTML = 
-                    `Source: <a href="${article.url}" target="_blank">${article.source.name}</a>`;
-            } catch (error) {
-                console.error("Error fetching news:", error);
-                document.getElementById("snippet-text").textContent = "Failed to load snippets.";
-                document.getElementById("snippet-source").textContent = "";
-            }
-        }
-
-        // Function to summarize text (approx 50 words)
-        function summarizeText(text, wordLimit) {
-            if (!text) return "No description available.";
-            const words = text.split(" ");
-            return words.length > wordLimit ? words.slice(0, wordLimit).join(" ") + "..." : text;
-        }
-
-        // Initialize
-        updateDateTime();
-        fetchLatestSnippet();
-
-        // Event listener for "Next Snippet"
-        document.getElementById("next-btn").addEventListener("click", fetchLatestSnippet);
-    </script>
+    <script src="config.js"></script>  <!-- API keys & settings -->
+    <script src="utils.js"></script>   <!-- Helper functions -->
+    <script src="script.js"></script>  <!-- Main script -->
 </body>
 </html>
