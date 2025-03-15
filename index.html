@@ -108,38 +108,42 @@
             }
         }
 
-        // Fetch and parse RSS feed
+        // Fetch AI news from GNews API
         async function fetchLatestSnippet() {
-            const rssUrl = "https://venturebeat.com/category/ai/feed/";
-            const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+            const API_KEY = "f6bf806baa42405dece46b5f18121d38";  // Replace with your actual API key
+            const url = `https://gnews.io/api/v4/search?q=Artificial+Intelligence&lang=en&token=${API_KEY}`;
 
             try {
-                const response = await fetch(proxyUrl);
+                const response = await fetch(url);
                 const data = await response.json();
 
-                if (data.status !== "ok") {
-                    throw new Error("Failed to fetch RSS feed.");
+                if (!data.articles || data.articles.length === 0) {
+                    throw new Error("No news articles found.");
                 }
 
-                // Sort articles by date (latest first)
-                const items = data.items.map(item => ({
-                    description: item.description,
-                    link: item.link,
-                    pubDate: new Date(item.pubDate)
-                })).sort((a, b) => b.pubDate - a.pubDate);
+                // Pick a random article
+                const randomIndex = Math.floor(Math.random() * data.articles.length);
+                const article = data.articles[randomIndex];
 
-                // Pick the latest article
-                const latestArticle = items[0];
+                // Summarize content (limit to ~50 words)
+                const summary = summarizeText(article.description || article.content, 50);
 
                 // Display the snippet
-                document.getElementById("snippet-text").textContent = latestArticle.description;
+                document.getElementById("snippet-text").textContent = summary;
                 document.getElementById("snippet-source").innerHTML = 
-                    `Published on: ${latestArticle.pubDate.toDateString()} | <a href="${latestArticle.link}" target="_blank">Read More</a>`;
+                    `Source: <a href="${article.url}" target="_blank">${article.source.name}</a>`;
             } catch (error) {
-                console.error("Error fetching RSS feed:", error);
+                console.error("Error fetching news:", error);
                 document.getElementById("snippet-text").textContent = "Failed to load snippets.";
                 document.getElementById("snippet-source").textContent = "";
             }
+        }
+
+        // Function to summarize text (approx 50 words)
+        function summarizeText(text, wordLimit) {
+            if (!text) return "No description available.";
+            const words = text.split(" ");
+            return words.length > wordLimit ? words.slice(0, wordLimit).join(" ") + "..." : text;
         }
 
         // Initialize
